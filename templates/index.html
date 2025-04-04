@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Network Info</title>
+    <style>
+        /* Basic reset */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #070a10;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+
+        h1 {
+            color: #FFFFFF;
+            margin-bottom: 20px;
+            font-size: 24px;
+            text-align: center;
+        }
+
+        #info {
+            background-color: #161b22;
+            color: #b1b8c0;
+            border-radius: 15px;
+            padding: 20px;
+            max-width: 400px;
+            width: 100%;
+            text-align: left;
+            align-items: center;
+            justify-content: center;
+        }
+
+        #info p {
+            font-size: 16px;
+            line-height: 1.6;
+            margin-bottom: 10px;
+        }
+
+        button {
+            background-color: #5cdd8b;
+            color: #020b05;
+            border: none;
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+            border-radius: 25px;
+            margin-top: 10px;
+            transition: background-color 0.3s, color 0.3s;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 120px; /* Ensure the button has a consistent width */
+            height: 40px; /* Set a consistent height */
+            text-align: center;
+        }
+
+        button:hover {
+            background-color: white;
+            color: #5cdd8b;
+        }
+
+        button:focus {
+            outline: none;
+            touch-action: manipulation;
+        }
+
+        button.clicked {
+            background-color: white;
+            color: #5cdd8b;
+            font-size: 20px; /* Ensure the checkmark is large enough */
+            font-weight: bold;
+        }
+
+        textarea {
+            position: absolute;
+            left: -9999px;
+        }
+    </style>
+    <script>
+        async function fetchNetworkInfo() {
+            try {
+                let response = await fetch('/get_info');
+                let data = await response.json();
+                let timestamp = new Date().toLocaleString();
+
+                let formattedText = `Time: ${timestamp}\nHostname: ${data.hostname}\nLocal IP: ${data.ip}\nMAC Address: ${data.mac}`;
+
+                document.getElementById("info").innerHTML = `
+                    <p><b>Time:</b> ${timestamp} (Boise)</p>
+                    <p><b>Hostname:</b> ${data.hostname}</p>
+                    <p><b>Local IP:</b> ${data.ip}</p>
+                    <p><b>MAC Address:</b> ${data.mac}</p>
+                    <button onclick="copyToClipboard()">Copy Info</button>
+                    <textarea id="copy-text">${formattedText}</textarea>
+                `;
+            } catch (error) {
+                console.error("Error fetching data:", error);
+                document.getElementById("info").innerHTML = `<p>Error loading data</p>`;
+            }
+        }
+
+        function copyToClipboard() {
+            // Select the formatted network info and copy it to the clipboard
+            // blur the text so mobile keyboards toggle back down
+            let copyText = document.getElementById("copy-text");
+            copyText.select();
+            copyText.setSelectionRange(0, 99999);
+            document.execCommand("copy");
+            copyText.blur();
+
+            // Change the button text to a checkmark and disable pointer events temporarily
+            let button = document.querySelector("button");
+            button.classList.add("clicked");
+            button.innerHTML = "✔";
+            button.style.pointerEvents = "none";
+
+            // Restore the button text after a short delay
+            setTimeout(() => {
+                button.classList.remove("clicked");
+                button.style.backgroundColor = "#5cdd8b";
+                button.style.color = "#020b05";
+                button.innerHTML = "Copy Info";
+                button.style.pointerEvents = "auto";
+            }, 2000);
+        }
+
+
+
+        window.onload = fetchNetworkInfo;
+    </script>
+</head>
+<body>
+    <div>
+        <h1>Your Network Info</h1>
+        <div id="info"><p>Loading...</p></div>
+    </div>
+</body>
+</html>
