@@ -22,10 +22,31 @@ def get_fqdn(ip):
     try:
         # Run nslookup command
         result = subprocess.run(["nslookup", ip], capture_output=True, text=True)
-        fqdn = re.search(r"Name:\s+(.+)", result.stdout)
-        return fqdn.split('.keystone')[0]
+
+        # Log the raw nslookup output to see what's being returned
+        print(f"NSLookup output for {ip}:\n{result.stdout}")
+
+        # Update regex to account for "name ="
+        fqdn = re.search(r"name\s*=\s*(\S+)", result.stdout)
+
+        if fqdn:
+            # Extract the FQDN part
+            fqdn_value = fqdn.group(1)
+            print(f"FQDN found: {fqdn_value}")
+
+            # Strip off the TLD by splitting at the first(last) dot
+            host_part = fqdn_value.split('.')[0]
+
+            # Return the hostname without the TLD
+            print(f"Host part without TLD: {host_part}")
+            return host_part
+
+        else:
+            print("No FQDN found in nslookup result.")
+
     except Exception as e:
         print(f"Error getting Hostname: {e}")
+
     return "Unknown"
 
 @app.route("/")
