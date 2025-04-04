@@ -13,7 +13,7 @@ COPY . .
 RUN pip install --no-cache-dir flask
 
 # Expose port
-EXPOSE 5000
+EXPOSE 5001
 
 # Run the application
 CMD ["python", "network-info.py"]
