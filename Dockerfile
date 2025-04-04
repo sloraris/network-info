@@ -1,7 +1,7 @@
 FROM python:3.11-slim
 
 # Install dependencies
-RUN apt-get update && apt-get install -y net-tools && rm -rf /var/lib/apt/lists/*
+RUN apt-get update && apt-get install -y net-tools dnsutils && rm -rf /var/lib/apt/lists/*
 
 # Set the working directory
 WORKDIR /app
